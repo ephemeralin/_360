@@ -17,7 +17,7 @@ public class ConnectorMySqlTest {
      */
     @Test
     public void getConnectionTest() {
-        final ConnectorMySql connectorMySql = new ConnectorMySql(new PropertiesStorage("/properties.properties"));
+        final ConnectorMySql connectorMySql = new ConnectorMySql(PropertiesStorage.getInstance("/properties.properties"));
         final Connection connection = connectorMySql.getConnection();
         try {
             assertTrue("DB connection failed!", connection.isValid(10));

@@ -25,16 +25,34 @@ public class PropertiesStorage {
      */
     private Properties properties;
 
+    /**
+     * Properties storage instance.
+     */
+    private static PropertiesStorage instance;
+
 
     /**
      * Instantiates a new Properties storage.
      *
      * @param propertiesFileName properties file name
      */
-    public PropertiesStorage(String propertiesFileName) {
+    private PropertiesStorage(String propertiesFileName) {
         this.propertiesFileName = propertiesFileName;
         this.log = LogManager.getLogger(this.getClass());
         updatePropertiesFromFile(propertiesFileName);
+    }
+
+    /**
+     * Gets instance.
+     *
+     * @param propertiesFileName the properties file name
+     * @return the instance
+     */
+    public static PropertiesStorage getInstance(String propertiesFileName) {
+        if (instance == null) {
+            instance = new PropertiesStorage(propertiesFileName);
+        }
+        return instance;
     }
 
     /**

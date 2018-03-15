@@ -10,6 +10,7 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -30,9 +31,9 @@ public class RssGrabber {
     }
 
     /**
-     * Grab.
+     * Grab data.
      *
-     * @return the list of items
+     * @return the list
      */
     public List<Item> grab() {
         final ArrayList<Item> items = new ArrayList<>();
@@ -41,17 +42,44 @@ public class RssGrabber {
             final Document doc = Jsoup.connect(url).get();
             final Elements itemElements = doc.getElementsByTag("item");
             for (Element itemElement : itemElements) {
-                final Item item = new Item(itemElement.getElementsByTag("title").text(),
-                        itemElement.getElementsByTag("link").text(),
-                        itemElement.getElementsByTag("description").text(),
-                        itemElement.getElementsByTag("pubDate").text(),
-                        grabItemsFullText(itemElement.getElementsByTag("link").text()));
-                items.add(item);
+                items.add(createItem(itemElement.getElementsByTag("title").text(),
+                                        itemElement.getElementsByTag("link").text(),
+                                        itemElement.getElementsByTag("description").text(),
+                                        itemElement.getElementsByTag("pubDate").text()));
             }
         } catch (IOException e) {
             logger.error("Error when trying to parse RSS feed", e);
         }
         return items;
+    }
+
+    /**
+     * Create item.
+     * @param title the title
+     * @param link the link
+     * @param description the description
+     * @param pubDateString the publication date (string)
+     * @return item
+     */
+    private Item createItem(String title, String link, String description, String pubDateString) {
+        final Item item = new Item(title,
+                                    link,
+                                    description,
+                                    pubDateString,
+                                    Calendar.getInstance().getTimeInMillis());
+        item.setFullText(grabItemsFullText(link));
+        item.setPubDate(parsePubDate(pubDateString));
+        return item;
+    }
+
+    /**
+     * Convert date string to date.
+     * @param pubDateString date string
+     * @return date
+     */
+    private Long parsePubDate(String pubDateString) {
+        //todo implement parsing of the string date
+        return Long.MIN_VALUE;
     }
 
     /**
@@ -63,7 +91,7 @@ public class RssGrabber {
         String text = "";
         try {
             final Document doc = Jsoup.connect(url).get();
-            int i = 1;
+            text = doc.getElementsByClass("MaterialContent").text();
         } catch (IOException e) {
             logger.error("Error when trying to parse News page", e);
         }

@@ -18,29 +18,38 @@ public class Item {
      */
     private String description;
     /**
+     * Publication date string.
+     */
+    private String pubDateString;
+    /**
      * Publication date.
      */
-    private String pubDate;
+    private Long pubDate;
     /**
      * Full text of item.
      */
     private String fullText;
 
     /**
+     * Created date.
+     */
+    private Long createdDate;
+
+    /**
      * Instantiates a new Item.
      *
-     * @param title       the title
-     * @param link        the link
-     * @param description the description
-     * @param pubDate     the pub date
-     * @param fullText    the full text
+     * @param title         the title
+     * @param link          the link
+     * @param description   the description
+     * @param pubDateString the pub date string
+     * @param createdDate   the createdDate date
      */
-    public Item(String title, String link, String description, String pubDate, String fullText) {
+    public Item(String title, String link, String description, String pubDateString, Long createdDate) {
         this.title = title;
         this.link = link;
         this.description = description;
-        this.pubDate = pubDate;
-        this.fullText = fullText;
+        this.pubDateString = pubDateString;
+        this.createdDate = createdDate;
     }
 
     /**
@@ -98,11 +107,29 @@ public class Item {
     }
 
     /**
+     * Gets pub date string.
+     *
+     * @return the pub date string
+     */
+    public String getPubDateString() {
+        return pubDateString;
+    }
+
+    /**
+     * Sets pub date string.
+     *
+     * @param pubDateString the pub date string
+     */
+    public void setPubDateString(String pubDateString) {
+        this.pubDateString = pubDateString;
+    }
+
+    /**
      * Gets pub date.
      *
      * @return the pub date
      */
-    public String getPubDate() {
+    public Long getPubDate() {
         return pubDate;
     }
 
@@ -111,7 +138,7 @@ public class Item {
      *
      * @param pubDate the pub date
      */
-    public void setPubDate(String pubDate) {
+    public void setPubDate(Long pubDate) {
         this.pubDate = pubDate;
     }
 
@@ -133,14 +160,32 @@ public class Item {
         this.fullText = fullText;
     }
 
+    /**
+     * Gets created date.
+     *
+     * @return the created date
+     */
+    public Long getCreatedDate() {
+        return createdDate;
+    }
+
+    /**
+     * Sets created date.
+     *
+     * @param createdDate the created date
+     */
+    public void setCreatedDate(Long createdDate) {
+        this.createdDate = createdDate;
+    }
+
     @Override
     public String toString() {
         return "Item{" +
                 "title='" + title + '\'' +
                 ", link='" + link + '\'' +
-                ", description='" + description + '\'' +
-                ", pubDate='" + pubDate + '\'' +
-                ", fullText='" + fullText + '\'' +
+                ", pubDateString='" + pubDateString + '\'' +
+                ", pubDate=" + pubDate +
+                ", createdDate=" + createdDate +
                 '}';
     }
 }

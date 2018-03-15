@@ -1,11 +1,10 @@
 package com.ephemeralin.z360;
 
+import com.ephemeralin.z360.db.ItemMySqlDAO;
+import com.ephemeralin.z360.meduza.Item;
 import com.ephemeralin.z360.meduza.RssGrabber;
-import com.ephemeralin.z360.util.ConnectorMySql;
-import com.ephemeralin.z360.util.PropertiesStorage;
 
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.util.List;
 
 /**
  * The type Application.
@@ -17,15 +16,11 @@ public class Application {
      * @param args the input arguments
      */
     public static void main(String[] args) {
+        final ItemMySqlDAO dao = new ItemMySqlDAO("/properties.properties");
         RssGrabber rssGrabber = new RssGrabber();
-        rssGrabber.grab();
-
-        final ConnectorMySql connector = new ConnectorMySql(new PropertiesStorage("/properties.properties"));
-        final Connection connection = connector.getConnection();
-        try {
-            connection.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        final List<Item> items = rssGrabber.grab();
+        for (Item item : items) {
+            dao.insertItem(item);
         }
     }
 }
