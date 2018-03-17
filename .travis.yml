@@ -1,8 +1,17 @@
 language: java
 
+services:
+  - mysql
+
 notifications:
   email:
     recipients:
       - ephemeralin@gmail.com
-    on_success: never # default: change
+    on_success: always # default: change
     on_failure: always # default: always
+
+before_install:
+  - mysql -e 'CREATE DATABASE _360;'
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
