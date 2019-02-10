@@ -1,7 +1,6 @@
 package com.ephemeralin.z360.model;
 
 import lombok.Data;
-import org.hibernate.annotations.GeneratorType;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -51,15 +50,25 @@ public class Item {
     @Column(name = "created_date")
     private LocalDateTime createdDate;
 
+    @Column(name = "source", length = 20)
+    @Enumerated(EnumType.STRING)
+    private Source source;
+
     public Item() {
     }
 
-    public Item(String title, String link, String description, String fullText, LocalDateTime pubDate, LocalDateTime createdDate) {
+    public Item(String title, String link, String description, String fullText, LocalDateTime pubDate, LocalDateTime createdDate, Source source) {
         this.title = title;
         this.link = link;
         this.description = description;
         this.fullText = fullText;
         this.pubDate = pubDate;
         this.createdDate = createdDate;
+        this.source = source;
+
+    }
+
+    public enum Source {
+        VESTI, MEDUZA
     }
 }

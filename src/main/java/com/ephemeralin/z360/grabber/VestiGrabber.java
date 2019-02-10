@@ -29,7 +29,8 @@ public class VestiGrabber extends BaseGrabber implements IGrabber {
                         itemElement.getElementsByTag("yandex:full-text").text(),
 //                        parsePubDate(itemElement.getElementsByTag("pubDate").text()),
                         LocalDateTime.now(),
-                        LocalDateTime.now()
+                        LocalDateTime.now(),
+                        Item.Source.VESTI
                 );
                 items.add(item);
             }

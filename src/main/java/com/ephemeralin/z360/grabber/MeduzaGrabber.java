@@ -38,7 +38,8 @@ public class MeduzaGrabber extends BaseGrabber implements IGrabber {
                         getDataWithFullText(itemElement.getElementsByTag("link").text()),
                         //parsePubDate(itemElement.getElementsByTag("pubDate").text()),
                         LocalDateTime.now(),
-                        LocalDateTime.now()
+                        LocalDateTime.now(),
+                        Item.Source.MEDUZA
                 );
                 items.add(item);
             }
