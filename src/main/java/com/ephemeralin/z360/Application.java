@@ -1,26 +1,38 @@
 package com.ephemeralin.z360;
 
-import com.ephemeralin.z360.db.ItemMySqlDAO;
-import com.ephemeralin.z360.meduza.Item;
-import com.ephemeralin.z360.meduza.RssGrabber;
-
-import java.util.List;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 
 /**
  * The type Application.
  */
+@SpringBootApplication
+@Configuration
+@Log4j2
 public class Application {
+
+    private final Environment env;
+
     /**
-     * The entry point of application.
+     * Instantiates a new spring boot app.
      *
-     * @param args the input arguments
+     * @param env the env
+     */
+    @Autowired
+    public Application(Environment env) {
+        this.env = env;
+    }
+
+    /**
+     * Main.
+     *
+     * @param args the args
      */
     public static void main(String[] args) {
-        final ItemMySqlDAO dao = new ItemMySqlDAO("/properties.properties");
-        RssGrabber rssGrabber = new RssGrabber();
-        final List<Item> items = rssGrabber.grab();
-        for (Item item : items) {
-            dao.insertItem(item);
-        }
+        SpringApplication.run(Application.class);
     }
 }

@@ -1,6 +1,6 @@
-package com.ephemeralin.z360.model;
+package com.ephemeralin.z360.dao;
 
-import com.ephemeralin.z360.meduza.Item;
+import com.ephemeralin.z360.model.Item;
 
 import java.util.List;
 
