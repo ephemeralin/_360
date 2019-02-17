@@ -65,7 +65,6 @@ public class Item {
         this.pubDate = pubDate;
         this.createdDate = createdDate;
         this.source = source;
-
     }
 
     public enum Source {

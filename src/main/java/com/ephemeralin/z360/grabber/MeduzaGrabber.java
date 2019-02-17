@@ -49,6 +49,11 @@ public class MeduzaGrabber extends BaseGrabber implements IGrabber {
         return items;
     }
 
+    @Override
+    public LocalDateTime parseDate(String s) {
+        return null;
+    }
+
     /**
      * Convert date string to date.
      * @param pubDateString date string

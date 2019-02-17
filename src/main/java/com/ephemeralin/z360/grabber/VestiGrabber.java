@@ -1,6 +1,7 @@
 package com.ephemeralin.z360.grabber;
 
 import com.ephemeralin.z360.model.Item;
+import com.ephemeralin.z360.util.DatesHelper;
 import lombok.extern.log4j.Log4j2;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -28,7 +29,7 @@ public class VestiGrabber extends BaseGrabber implements IGrabber {
                         itemElement.getElementsByTag("description").text(),
                         itemElement.getElementsByTag("yandex:full-text").text(),
 //                        parsePubDate(itemElement.getElementsByTag("pubDate").text()),
-                        LocalDateTime.now(),
+                        parseDate(itemElement.getElementsByTag("pubDate").text()),
                         LocalDateTime.now(),
                         Item.Source.VESTI
                 );
@@ -40,18 +41,20 @@ public class VestiGrabber extends BaseGrabber implements IGrabber {
         return items;
     }
 
+    /**
+     * Convert date string to date.
+     * @param s date string
+     * @return date
+     */
+    @Override
+    public LocalDateTime parseDate(String s) {
+        return DatesHelper.parseVestiDateTime(s);
+    }
+
     @Override
     public String getDataWithFullText(String url) {
         return null;
     }
 
-    /**
-     * Convert date string to date.
-     * @param pubDateString date string
-     * @return date
-     */
-    private Long parsePubDate(String pubDateString) {
-        //todo implement parsing of the string date
-        return Long.MIN_VALUE;
-    }
+
 }

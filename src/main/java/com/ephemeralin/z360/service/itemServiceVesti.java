@@ -7,14 +7,15 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * The Item service.
+ * The Item service for Vesti source.
  */
-@Repository("itemService")
+@Repository("itemServiceVesti")
 @Transactional
-public class ItemServiceImpl implements ItemService {
+public class itemServiceVesti implements ItemService {
 
     @Autowired
     private ItemRepository repository;
@@ -31,7 +32,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<Item> findAll() {
-        return this.repository.findAll();
+        return this.repository.findAllByOrderByPubDateDesc();
     }
 
     @Override
@@ -48,4 +49,12 @@ public class ItemServiceImpl implements ItemService {
     public Item findByTitle(String title) {
         return this.repository.findByTitle(title).orElse(null);
     }
+
+    @Override
+    public List<Item> findItemsByPubDateBetween(LocalDateTime startDate, LocalDateTime endDate) {
+        return this.repository.findItemsByPubDateBetweenOrderByPubDateDesc(startDate, endDate);
+    }
+
+
+
 }
