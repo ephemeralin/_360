@@ -3,7 +3,10 @@ package com.ephemeralin.z360.controller;
 import com.ephemeralin.z360.grabber.IGrabber;
 import com.ephemeralin.z360.grabber.VestiGrabber;
 import com.ephemeralin.z360.model.Item;
+import com.ephemeralin.z360.model.KeywordSet;
+import com.ephemeralin.z360.model.Source;
 import com.ephemeralin.z360.service.ItemService;
+import com.ephemeralin.z360.service.KeywordService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
@@ -31,7 +34,10 @@ import java.util.*;
 public class SourceController {
 
     @Autowired
-    private ItemService itemServiceVesti;
+    private ItemService itemService;
+
+    @Autowired
+    private KeywordService keywordService;
 
     @InitBinder
     public void initBinder(WebDataBinder binder) {
@@ -73,8 +79,10 @@ public class SourceController {
             @DateTimeFormat(pattern="dd.MM.yyyy") @RequestParam(name="startDate", required=false, defaultValue="startOfDay") LocalDate startDate,
             Model model) {
 
-        List<Item> itemList = itemServiceVesti.findItemsByPubDateBetween(startDate.atStartOfDay(), startDate.atTime(LocalTime.MAX));
+        List<Item> itemList = itemService.findItemsByPubDateBetween(startDate.atStartOfDay(), startDate.atTime(LocalTime.MAX), Source.VESTI);
+        KeywordSet keys = keywordService.findByDate(startDate, Source.VESTI);
 
+        model.addAttribute("keys", keys);
         model.addAttribute("itemList", itemList);
         model.addAttribute("startDate", startDate);
 
@@ -90,8 +98,8 @@ public class SourceController {
         IGrabber grabber = new VestiGrabber();
         final List<Item> items = grabber.getData();
         for (Item item : items) {
-            if (itemServiceVesti.findByTitle(item.getTitle()) == null) {
-                int id = itemServiceVesti.create(item);
+            if (itemService.findByTitle(item.getTitle(), Source.VESTI) == null) {
+                long id = itemService.create(item);
                 item.setId(id);
             }
         }
@@ -105,20 +113,39 @@ public class SourceController {
             @DateTimeFormat(pattern="dd.MM.yyyy") @RequestParam(name="startDate") LocalDate startDate,
             Model model) {
 
-        List<Item> itemList = itemServiceVesti.findItemsByPubDateBetween(startDate.atStartOfDay(), startDate.atTime(LocalTime.MAX));
+        List<Item> itemList = itemService.findItemsByPubDateBetween(startDate.atStartOfDay(), startDate.atTime(LocalTime.MAX), Source.VESTI);
+        KeywordSet keys = keywordService.findByDate(startDate, Source.VESTI);
 
         model.addAttribute("itemList", itemList);
         model.addAttribute("startDate", startDate);
+        model.addAttribute("keys", keys);
         return "vesti";
     }
 
     @PostMapping(value = "/vesti", params = "save-keys")
-    public String saveKeysVesti(
+    public void saveKeysVesti(
             @RequestParam(name = "source", required = false) String source,
+            @RequestParam(name = "id", required = false) Long id,
+            @RequestParam(name = "words", required = false) String words,
             @DateTimeFormat(pattern="dd.MM.yyyy") @RequestParam(name="startDate") LocalDate startDate,
             Model model) {
 
-        return "redirect:/vesti";
+        if (id != null) {
+            KeywordSet keywordSet = new KeywordSet(id);
+            keywordSet.setSource(Source.VESTI);
+            keywordSet.setCreatedDate(startDate.atStartOfDay());
+            keywordSet.setWords(words);
+            keywordService.update(keywordSet);
+        } else if (!words.isEmpty()) {
+            KeywordSet keywordSet = new KeywordSet();
+            keywordSet.setSource(Source.VESTI);
+            keywordSet.setCreatedDate(startDate.atStartOfDay());
+            keywordSet.setWords(words);
+            long idNew = keywordService.create(keywordSet);
+            keywordSet.setId(idNew);
+        }
+        showVestiByPeriod(source, startDate, model);
+        //return "redirect:/vesti";
     }
 
 }

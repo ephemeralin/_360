@@ -1,6 +1,7 @@
 package com.ephemeralin.z360.service;
 
 import com.ephemeralin.z360.model.Item;
+import com.ephemeralin.z360.model.Source;
 import com.ephemeralin.z360.repository.ItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -13,26 +14,26 @@ import java.util.List;
 /**
  * The Item service for Vesti source.
  */
-@Repository("itemServiceVesti")
+@Repository("itemService")
 @Transactional
-public class itemServiceVesti implements ItemService {
+public class itemServiceImpl implements ItemService {
 
     @Autowired
     private ItemRepository repository;
 
     @Override
-    public int create(Item i) {
+    public long create(Item i) {
         return this.repository.save(i).getId();
     }
 
     @Override
-    public Item findById(int id) {
+    public Item findById(long id) {
         return this.repository.findById(id).orElseThrow(EntityNotFoundException::new);
     }
 
     @Override
-    public List<Item> findAll() {
-        return this.repository.findAllByOrderByPubDateDesc();
+    public List<Item> findAll(Source source) {
+        return this.repository.findAll(source);
     }
 
     @Override
@@ -41,20 +42,18 @@ public class itemServiceVesti implements ItemService {
     }
 
     @Override
-    public void delete(int id) {
+    public void delete(long id) {
         this.repository.deleteById(id);
     }
 
     @Override
-    public Item findByTitle(String title) {
-        return this.repository.findByTitle(title).orElse(null);
+    public Item findByTitle(String title, Source source) {
+        return this.repository.findByTitleAndSource(title, source).orElse(null);
     }
 
     @Override
-    public List<Item> findItemsByPubDateBetween(LocalDateTime startDate, LocalDateTime endDate) {
-        return this.repository.findItemsByPubDateBetweenOrderByPubDateDesc(startDate, endDate);
+    public List<Item> findItemsByPubDateBetween(LocalDateTime startDate, LocalDateTime endDate, Source source) {
+        return this.repository.findAllByPubDateBetween(startDate, endDate, source);
     }
-
-
 
 }

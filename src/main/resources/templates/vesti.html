@@ -109,14 +109,14 @@
                     </div>
                     <div class="col-6">
                         <div class="row justify-content-end d-flex">
-                            <textarea class="form-control" id="key-wrd" rows="1" placeholder="keys" style="margin-left: 10px; margin-right: 10px; width: 80%; float: right"></textarea>
+                            <input type="text" name="id" th:value="${keys?.id}" hidden/>
+                            <input class="form-control" id="key-wrd" name="words" rows="1" placeholder="keys" th:value="${keys?.words}" style="margin-left: 10px; margin-right: 10px; width: 80%; float: right"></input>
                             <button style="width: 100px; float: right" class="btn btn-outline-dark" name="save-keys" type="submit">save</button>
                         </div>
                     </div>
                 </form>
             </div>
         </div>
-
 
     </div>
 </div>

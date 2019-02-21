@@ -21,7 +21,7 @@ public class Item {
 //            allocationSize = 20
 //    )
     @Column(name = "id")
-    private int id;
+    private long id;
 
     /**
      * Title.
@@ -67,7 +67,4 @@ public class Item {
         this.source = source;
     }
 
-    public enum Source {
-        VESTI, MEDUZA
-    }
 }

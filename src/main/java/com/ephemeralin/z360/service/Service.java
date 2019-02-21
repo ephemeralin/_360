@@ -1,5 +1,7 @@
 package com.ephemeralin.z360.service;
 
+import com.ephemeralin.z360.model.Source;
+
 import java.util.List;
 
 /**
@@ -14,7 +16,7 @@ public interface Service<T> {
      * @param entity the entity
      * @return the int
      */
-    int create(T entity);
+    long create(T entity);
 
     /**
      * Find by id t.
@@ -22,14 +24,14 @@ public interface Service<T> {
      * @param id the id
      * @return the t
      */
-    T findById(int id);
+    T findById(long id);
 
     /**
      * Find all list.
      *
      * @return the list
      */
-    List<T> findAll();
+    List<T> findAll(Source source);
 
     /**
      * Update t.
@@ -44,6 +46,6 @@ public interface Service<T> {
      *
      * @param id the id
      */
-    void delete(int id);
+    void delete(long id);
 
 }
