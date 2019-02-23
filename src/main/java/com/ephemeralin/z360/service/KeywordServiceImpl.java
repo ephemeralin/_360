@@ -1,7 +1,7 @@
 package com.ephemeralin.z360.service;
 
 import com.ephemeralin.z360.model.KeywordSet;
-import com.ephemeralin.z360.model.Source;
+import com.ephemeralin.z360.model.SOURCE;
 import com.ephemeralin.z360.repository.KeywordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -32,7 +32,7 @@ public class KeywordServiceImpl implements KeywordService {
     }
 
     @Override
-    public List<KeywordSet> findAll(Source source) {
+    public List<KeywordSet> findAll(SOURCE source) {
         return this.repository.findAll(source);
     }
 
@@ -47,7 +47,7 @@ public class KeywordServiceImpl implements KeywordService {
     }
 
     @Override
-    public KeywordSet findByDate(LocalDate date, Source source) {
+    public KeywordSet findByDate(LocalDate date, SOURCE source) {
         return this.repository.findByDate(date.atStartOfDay(), source).orElse(null);
     }
 

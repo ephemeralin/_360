@@ -52,12 +52,12 @@ public class Item {
 
     @Column(name = "source", length = 20)
     @Enumerated(EnumType.STRING)
-    private Source source;
+    private SOURCE source;
 
     public Item() {
     }
 
-    public Item(String title, String link, String description, String fullText, LocalDateTime pubDate, LocalDateTime createdDate, Source source) {
+    public Item(String title, String link, String description, String fullText, LocalDateTime pubDate, LocalDateTime createdDate, SOURCE source) {
         this.title = title;
         this.link = link;
         this.description = description;

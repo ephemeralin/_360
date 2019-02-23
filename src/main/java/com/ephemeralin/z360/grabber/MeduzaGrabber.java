@@ -2,7 +2,8 @@ package com.ephemeralin.z360.grabber;
 
 
 import com.ephemeralin.z360.model.Item;
-import com.ephemeralin.z360.model.Source;
+import com.ephemeralin.z360.model.SOURCE;
+import com.ephemeralin.z360.util.DatesHelper;
 import lombok.extern.log4j.Log4j2;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -37,10 +38,9 @@ public class MeduzaGrabber extends BaseGrabber implements IGrabber {
                         itemElement.getElementsByTag("link").text(),
                         itemElement.getElementsByTag("description").text(),
                         getDataWithFullText(itemElement.getElementsByTag("link").text()),
-                        //parsePubDate(itemElement.getElementsByTag("pubDate").text()),
+                        parseDate(itemElement.getElementsByTag("pubDate").text()),
                         LocalDateTime.now(),
-                        LocalDateTime.now(),
-                        Source.MEDUZA
+                        SOURCE.meduza
                 );
                 items.add(item);
             }
@@ -52,17 +52,7 @@ public class MeduzaGrabber extends BaseGrabber implements IGrabber {
 
     @Override
     public LocalDateTime parseDate(String s) {
-        return null;
-    }
-
-    /**
-     * Convert date string to date.
-     * @param pubDateString date string
-     * @return date
-     */
-    private Long parsePubDate(String pubDateString) {
-        //todo implement parsing of the string date
-        return Long.MIN_VALUE;
+        return DatesHelper.parseUsingFormatRFC1123(s);
     }
 
     /**

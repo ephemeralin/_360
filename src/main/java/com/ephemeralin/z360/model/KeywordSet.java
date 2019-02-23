@@ -19,7 +19,7 @@ public class KeywordSet {
 
     @Column(name = "source", length = 20)
     @Enumerated(EnumType.STRING)
-    private Source source;
+    private SOURCE source;
 
     @Column(name = "words")
     private String words;

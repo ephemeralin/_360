@@ -21,9 +21,8 @@ public class DatesHelper {
         return LocalDate.of(LocalDate.now().getYear(), 12, 31);
     }
 
-    public static LocalDateTime parseVestiDateTime(String s) {
-        //https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html
-//        "EEE, dd MMM yyyy HH:mm:ss Z"
+    public static LocalDateTime parseUsingFormatRFC1123(String s) {
+//        https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html
         ZonedDateTime parsed;
         DateTimeFormatter dtf = DateTimeFormatter.RFC_1123_DATE_TIME;
         try {
@@ -34,4 +33,5 @@ public class DatesHelper {
         }
         return parsed.toLocalDateTime();
     }
+
 }

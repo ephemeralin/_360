@@ -3,7 +3,7 @@
       xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
 <head>
-    <title>360˚ -> vesti</title>
+    <title>360˚ -> feed</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
@@ -53,13 +53,14 @@
 
 <input type="text" th:id="loginValue" th:value="${loginValue}" hidden/>
 <input type="text" th:id="isAdminValue" th:value="${isAdminValue}" hidden/>
+<!--<input type="text" th:id="sourceName" th:value="${sourceName}" />-->
 
 <div class="sticky">
     <div class="container-fluid">
         <!--title line-->
         <div class="row">
             <div class="col-2">
-                <h3>360˚ -> vesti</h3>
+                <h3 th:text="${sourceName}"></h3>
             </div>
 
             <div class="col-5">
@@ -91,18 +92,16 @@
         <!--controls line-->
         <div class="row">
             <div class="col-12">
-                <form th:action='@{/vesti}' th:method='post' class="form-inline">
-                    <input type="hidden" name="source" th:value="vesti">
+                <form th:action='@{/feed}' th:method='post' class="form-inline">
+                    <input type="hidden" th:id="sourceName" th:value="${sourceName}" name="sourceName">
                     <div class="col-6">
                         <div class="row">
                             <div class="form-group mr-2">
                                 <input class="form-control ml-1" type="text" id="startDate" name="startDate" placeholder="start date"
                                        th:value="${#temporals.format(startDate, 'dd.MM.yyyy')}"/>
                             </div>
-                            <!--<div class="form-group mr-2">-->
-                                <!--<input class="form-control ml-1" type="text" id="endDate" name="endDate" placeholder="end date"-->
-                                       <!--th:value="${#temporals.format(endDate, 'dd.MM.yyyy')}"/>-->
-                            <!--</div>-->
+                            <!--show-->
+                            <!--<input type="text" th:id="source" th:value="${source}" hidden/>-->
                             <button style="width: 100px; margin-right: 10px" class="btn btn-outline-dark" name="show-news" type="submit">show</button>
                             <button style="width: 100px; margin-right: 10px" class="btn btn-outline-dark" name="update-news" type="submit">update</button>
                         </div>
@@ -110,6 +109,7 @@
                     <div class="col-6">
                         <div class="row justify-content-end d-flex">
                             <input type="text" name="id" th:value="${keys?.id}" hidden/>
+                            <!--save-->
                             <input class="form-control" id="key-wrd" name="words" rows="1" placeholder="keys" th:value="${keys?.words}" style="margin-left: 10px; margin-right: 10px; width: 80%; float: right"></input>
                             <button style="width: 100px; float: right" class="btn btn-outline-dark" name="save-keys" type="submit">save</button>
                         </div>

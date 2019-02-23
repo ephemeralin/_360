@@ -1,7 +1,7 @@
 package com.ephemeralin.z360.service;
 
 import com.ephemeralin.z360.model.Item;
-import com.ephemeralin.z360.model.Source;
+import com.ephemeralin.z360.model.SOURCE;
 import com.ephemeralin.z360.repository.ItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -32,7 +32,7 @@ public class itemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<Item> findAll(Source source) {
+    public List<Item> findAll(SOURCE source) {
         return this.repository.findAll(source);
     }
 
@@ -47,12 +47,12 @@ public class itemServiceImpl implements ItemService {
     }
 
     @Override
-    public Item findByTitle(String title, Source source) {
+    public Item findByTitle(String title, SOURCE source) {
         return this.repository.findByTitleAndSource(title, source).orElse(null);
     }
 
     @Override
-    public List<Item> findItemsByPubDateBetween(LocalDateTime startDate, LocalDateTime endDate, Source source) {
+    public List<Item> findItemsByPubDateBetween(LocalDateTime startDate, LocalDateTime endDate, SOURCE source) {
         return this.repository.findAllByPubDateBetween(startDate, endDate, source);
     }
 

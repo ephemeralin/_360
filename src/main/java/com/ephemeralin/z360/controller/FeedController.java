@@ -1,10 +1,11 @@
 package com.ephemeralin.z360.controller;
 
 import com.ephemeralin.z360.grabber.IGrabber;
+import com.ephemeralin.z360.grabber.MeduzaGrabber;
 import com.ephemeralin.z360.grabber.VestiGrabber;
 import com.ephemeralin.z360.model.Item;
 import com.ephemeralin.z360.model.KeywordSet;
-import com.ephemeralin.z360.model.Source;
+import com.ephemeralin.z360.model.SOURCE;
 import com.ephemeralin.z360.service.ItemService;
 import com.ephemeralin.z360.service.KeywordService;
 import lombok.extern.log4j.Log4j2;
@@ -27,11 +28,11 @@ import java.time.LocalTime;
 import java.util.*;
 
 /**
- * The Source controller.
+ * The Feed controller.
  */
 @Controller
 @Log4j2
-public class SourceController {
+public class FeedController {
 
     @Autowired
     private ItemService itemService;
@@ -74,78 +75,86 @@ public class SourceController {
         return mv;
     }
 
-    @GetMapping(value = "/vesti")
-    public String showVesti(
+    @GetMapping(value = "/feed")
+    public void showFeed(
             @DateTimeFormat(pattern="dd.MM.yyyy") @RequestParam(name="startDate", required=false, defaultValue="startOfDay") LocalDate startDate,
+            @RequestParam(name = "sourceName", required = true) String sourceName,
             Model model) {
 
-        List<Item> itemList = itemService.findItemsByPubDateBetween(startDate.atStartOfDay(), startDate.atTime(LocalTime.MAX), Source.VESTI);
-        KeywordSet keys = keywordService.findByDate(startDate, Source.VESTI);
-
-        model.addAttribute("keys", keys);
-        model.addAttribute("itemList", itemList);
-        model.addAttribute("startDate", startDate);
-
-        return "vesti";
+        showFeedByPeriod(sourceName, startDate, model);
     }
 
-    @PostMapping(value = "/vesti", params = "update-news")
-    public String updateVesti(
-            @RequestParam(name = "source", required = false) String source,
+    @PostMapping(value = "/feed", params = "show-news")
+    public String showFeedByPeriod(
+            @RequestParam(name = "sourceName", required = true) String sourceName,
             @DateTimeFormat(pattern="dd.MM.yyyy") @RequestParam(name="startDate") LocalDate startDate,
             Model model) {
 
-        IGrabber grabber = new VestiGrabber();
-        final List<Item> items = grabber.getData();
+        SOURCE source = SOURCE.valueOf(sourceName);
+        List<Item> itemList = itemService.findItemsByPubDateBetween(startDate.atStartOfDay(), startDate.atTime(LocalTime.MAX), source);
+        KeywordSet keys = keywordService.findByDate(startDate, source);
+
+        model.addAttribute("keys", keys);
+        model.addAttribute("sourceName", sourceName);
+        model.addAttribute("itemList", itemList);
+        model.addAttribute("startDate", startDate);
+        return "feed";
+    }
+
+    @PostMapping(value = "/feed", params = "update-news")
+    public void updateFeed(
+            @RequestParam(name = "sourceName", required = true) String sourceName,
+            @DateTimeFormat(pattern="dd.MM.yyyy") @RequestParam(name="startDate") LocalDate startDate,
+            Model model) {
+
+        List<Item> items = Collections.EMPTY_LIST;
+
+        SOURCE source = SOURCE.valueOf(sourceName);
+        if (source == SOURCE.vesti) {
+            IGrabber grabber = new VestiGrabber();
+            items = grabber.getData();
+
+        } else if(source == SOURCE.meduza) {
+            IGrabber grabber = new MeduzaGrabber();
+            items = grabber.getData();
+        }
+
         for (Item item : items) {
-            if (itemService.findByTitle(item.getTitle(), Source.VESTI) == null) {
+            if (itemService.findByTitle(item.getTitle(), source) == null) {
                 long id = itemService.create(item);
                 item.setId(id);
             }
         }
-
-        return "redirect:/vesti";
+        showFeedByPeriod(sourceName, startDate, model);
     }
 
-    @PostMapping(value = "/vesti", params = "show-news")
-    public String showVestiByPeriod(
-            @RequestParam(name = "source", required = false) String source,
-            @DateTimeFormat(pattern="dd.MM.yyyy") @RequestParam(name="startDate") LocalDate startDate,
-            Model model) {
-
-        List<Item> itemList = itemService.findItemsByPubDateBetween(startDate.atStartOfDay(), startDate.atTime(LocalTime.MAX), Source.VESTI);
-        KeywordSet keys = keywordService.findByDate(startDate, Source.VESTI);
-
-        model.addAttribute("itemList", itemList);
-        model.addAttribute("startDate", startDate);
-        model.addAttribute("keys", keys);
-        return "vesti";
-    }
-
-    @PostMapping(value = "/vesti", params = "save-keys")
-    public void saveKeysVesti(
-            @RequestParam(name = "source", required = false) String source,
+    @PostMapping(value = "/feed", params = "save-keys")
+    public void saveKeys(
+            @RequestParam(name = "sourceName", required = true) String sourceName,
             @RequestParam(name = "id", required = false) Long id,
             @RequestParam(name = "words", required = false) String words,
             @DateTimeFormat(pattern="dd.MM.yyyy") @RequestParam(name="startDate") LocalDate startDate,
             Model model) {
 
+        SOURCE source = SOURCE.valueOf(sourceName);
         if (id != null) {
-            KeywordSet keywordSet = new KeywordSet(id);
-            keywordSet.setSource(Source.VESTI);
-            keywordSet.setCreatedDate(startDate.atStartOfDay());
-            keywordSet.setWords(words);
-            keywordService.update(keywordSet);
+            if (words.isEmpty()) {
+                keywordService.delete(id);
+            } else {
+                KeywordSet keywordSet = new KeywordSet(id);
+                keywordSet.setSource(source);
+                keywordSet.setCreatedDate(startDate.atStartOfDay());
+                keywordSet.setWords(words);
+                keywordService.update(keywordSet);
+            }
         } else if (!words.isEmpty()) {
             KeywordSet keywordSet = new KeywordSet();
-            keywordSet.setSource(Source.VESTI);
+            keywordSet.setSource(source);
             keywordSet.setCreatedDate(startDate.atStartOfDay());
             keywordSet.setWords(words);
             long idNew = keywordService.create(keywordSet);
             keywordSet.setId(idNew);
         }
-        showVestiByPeriod(source, startDate, model);
-        //return "redirect:/vesti";
+        showFeedByPeriod(sourceName, startDate, model);
     }
-
 }
