@@ -1,5 +1,9 @@
 package com.ephemeralin.z360.model;
 
-public enum Source {
-    VESTI, MEDUZA
+import lombok.Getter;
+
+@Getter
+public enum SOURCE {
+    vesti,
+    meduza;
 }
