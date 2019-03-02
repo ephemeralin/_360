@@ -72,7 +72,6 @@
                     <button style="width: 100px" class="btn btn-outline-dark float-right" type="submit">logout</button>
                 </form>
             </div>
-
         </div>
 
         <!--controls line-->
@@ -83,11 +82,10 @@
                     <div class="col-6">
                         <div class="row">
                             <div class="form-group mr-2">
-                                <input class="form-control ml-1" type="text" id="startDate" name="startDate" placeholder="start date"
+                                <input class="form-control ml-1" type="text" id="startDate" name="startDate" placeholder="date"
                                        th:value="${#temporals.format(startDate, 'dd.MM.yyyy')}"/>
                             </div>
                             <!--show-->
-                            <!--<input type="text" th:id="source" th:value="${source}" hidden/>-->
                             <button style="width: 100px; margin-right: 10px" class="btn btn-outline-dark" name="show-news" type="submit">show</button>
                             <button style="width: 100px; margin-right: 10px" class="btn btn-outline-dark" name="update-news" type="submit">update</button>
                         </div>

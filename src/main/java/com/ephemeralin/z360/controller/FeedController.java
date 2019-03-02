@@ -5,7 +5,7 @@ import com.ephemeralin.z360.grabber.MeduzaGrabber;
 import com.ephemeralin.z360.grabber.VestiGrabber;
 import com.ephemeralin.z360.model.Item;
 import com.ephemeralin.z360.model.KeywordSet;
-import com.ephemeralin.z360.model.SOURCE;
+import com.ephemeralin.z360.model.Source;
 import com.ephemeralin.z360.service.ItemService;
 import com.ephemeralin.z360.service.KeywordService;
 import lombok.extern.log4j.Log4j2;
@@ -90,7 +90,7 @@ public class FeedController {
             @DateTimeFormat(pattern="dd.MM.yyyy") @RequestParam(name="startDate") LocalDate startDate,
             Model model) {
 
-        SOURCE source = SOURCE.valueOf(sourceName);
+        Source source = Source.valueOf(sourceName);
         List<Item> itemList = itemService.findItemsByPubDateBetween(startDate.atStartOfDay(), startDate.atTime(LocalTime.MAX), source);
         KeywordSet keys = keywordService.findByDate(startDate, source);
 
@@ -109,12 +109,12 @@ public class FeedController {
 
         List<Item> items = Collections.EMPTY_LIST;
 
-        SOURCE source = SOURCE.valueOf(sourceName);
-        if (source == SOURCE.vesti) {
+        Source source = Source.valueOf(sourceName);
+        if (source == Source.vesti) {
             IGrabber grabber = new VestiGrabber();
             items = grabber.getData();
 
-        } else if(source == SOURCE.meduza) {
+        } else if(source == Source.meduza) {
             IGrabber grabber = new MeduzaGrabber();
             items = grabber.getData();
         }
@@ -136,7 +136,7 @@ public class FeedController {
             @DateTimeFormat(pattern="dd.MM.yyyy") @RequestParam(name="startDate") LocalDate startDate,
             Model model) {
 
-        SOURCE source = SOURCE.valueOf(sourceName);
+        Source source = Source.valueOf(sourceName);
         if (id != null) {
             if (words.isEmpty()) {
                 keywordService.delete(id);

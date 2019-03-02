@@ -1,7 +1,7 @@
 package com.ephemeralin.z360.grabber;
 
 import com.ephemeralin.z360.model.Item;
-import com.ephemeralin.z360.model.SOURCE;
+import com.ephemeralin.z360.model.Source;
 import com.ephemeralin.z360.util.DatesHelper;
 import lombok.extern.log4j.Log4j2;
 import org.jsoup.Jsoup;
@@ -30,7 +30,7 @@ public class VestiGrabber extends BaseGrabber implements IGrabber {
                         itemElement.getElementsByTag("yandex:full-text").text(),
                         parseDate(itemElement.getElementsByTag("pubDate").text()),
                         LocalDateTime.now(),
-                        SOURCE.vesti
+                        Source.vesti
                 );
                 items.add(item);
             }

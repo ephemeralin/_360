@@ -2,7 +2,7 @@ package com.ephemeralin.z360.grabber;
 
 
 import com.ephemeralin.z360.model.Item;
-import com.ephemeralin.z360.model.SOURCE;
+import com.ephemeralin.z360.model.Source;
 import com.ephemeralin.z360.util.DatesHelper;
 import lombok.extern.log4j.Log4j2;
 import org.jsoup.Jsoup;
@@ -40,7 +40,7 @@ public class MeduzaGrabber extends BaseGrabber implements IGrabber {
                         getDataWithFullText(itemElement.getElementsByTag("link").text()),
                         parseDate(itemElement.getElementsByTag("pubDate").text()),
                         LocalDateTime.now(),
-                        SOURCE.meduza
+                        Source.meduza
                 );
                 items.add(item);
             }

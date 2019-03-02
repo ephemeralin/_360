@@ -1,6 +1,6 @@
 package com.ephemeralin.z360.service;
 
-import com.ephemeralin.z360.model.SOURCE;
+import com.ephemeralin.z360.model.Source;
 
 import java.util.List;
 
@@ -31,7 +31,7 @@ public interface Service<T> {
      *
      * @return the list
      */
-    List<T> findAll(SOURCE source);
+    List<T> findAll(Source source);
 
     /**
      * Update t.
