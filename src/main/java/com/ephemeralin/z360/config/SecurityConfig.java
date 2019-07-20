@@ -26,9 +26,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
                 .antMatchers("resources/**", "/css/**", "/static/**").permitAll()
-                .antMatchers("/cars/**").hasAnyRole("USER", "ADMIN")
-                .antMatchers("/update_car/**").hasAnyRole("USER", "ADMIN")
-                .antMatchers("/add_car/**").hasRole("ADMIN")
+                .antMatchers("/main/**", "/feed/**", "/cloud/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
                 .and()
                     .formLogin()
@@ -47,16 +45,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth
-                .inMemoryAuthentication()
-                .withUser("user").password("{noop}123").roles("USER")
-                .and()
-                .withUser("admin").password("{noop}123").roles("ADMIN");
-//        auth.jdbcAuthentication().dataSource(dataSource)
-//                .usersByUsernameQuery("select username, password, enabled"
-//                        + " from users where username=?")
-//                .authoritiesByUsernameQuery("select username, authority"
-//                        + " from authorities where username=?")
-//                .passwordEncoder(new BCryptPasswordEncoder());
+//        auth
+//                .inMemoryAuthentication()
+//                .withUser("user").password("{noop}123").roles("USER")
+//                .and()
+//                .withUser("admin").password("{noop}123").roles("ADMIN");
+        auth.jdbcAuthentication().dataSource(dataSource)
+                .usersByUsernameQuery("select username, password, enabled"
+                        + " from users where username=?")
+                .authoritiesByUsernameQuery("select username, authority"
+                        + " from authorities where username=?")
+                .passwordEncoder(new BCryptPasswordEncoder());
     }
 }
