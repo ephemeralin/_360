@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 @Log4j2
-public class VestiGrabber extends BaseGrabber implements IGrabber {
+public class VestiGrabber implements IGrabber {
     @Override
     public List<Item> getData() {
         final ArrayList<Item> items = new ArrayList<>();

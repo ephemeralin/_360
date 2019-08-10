@@ -10,15 +10,13 @@ import com.kennycason.kumo.font.scale.SqrtFontScalar;
 import com.kennycason.kumo.nlp.FrequencyAnalyzer;
 import com.kennycason.kumo.nlp.tokenizer.WordTokenizer;
 import com.kennycason.kumo.palette.ColorPalette;
+import org.springframework.util.Base64Utils;
 
 import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-
-import org.springframework.util.Base64Utils;
 
 public class WordCloudProducer {
 

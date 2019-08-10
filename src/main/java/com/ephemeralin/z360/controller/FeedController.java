@@ -1,5 +1,6 @@
 package com.ephemeralin.z360.controller;
 
+import com.ephemeralin.z360.grabber.GrabberFactory;
 import com.ephemeralin.z360.grabber.IGrabber;
 import com.ephemeralin.z360.grabber.MeduzaGrabber;
 import com.ephemeralin.z360.grabber.VestiGrabber;
@@ -106,19 +107,9 @@ public class FeedController {
             @RequestParam(name = "sourceName", required = true) String sourceName,
             @DateTimeFormat(pattern="dd.MM.yyyy") @RequestParam(name="startDate") LocalDate startDate,
             Model model) {
-
-        List<Item> items = Collections.EMPTY_LIST;
-
         Source source = Source.valueOf(sourceName);
-        if (source == Source.vesti) {
-            IGrabber grabber = new VestiGrabber();
-            items = grabber.getData();
-
-        } else if(source == Source.meduza) {
-            IGrabber grabber = new MeduzaGrabber();
-            items = grabber.getData();
-        }
-
+        IGrabber grabber = new GrabberFactory().getGrabber(Source.valueOf(sourceName));
+        List<Item> items = grabber.getData();
         for (Item item : items) {
             if (itemService.findByTitle(item.getTitle(), source) == null) {
                 long id = itemService.create(item);

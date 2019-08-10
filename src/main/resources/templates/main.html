@@ -67,7 +67,11 @@
     </form>
     <form th:action='@{/feed}' th:method='get'>
         <input type="hidden" name="sourceName" th:value="meduza">
-        <button style="width: 100px" class="btn btn-outline-dark" type="submit">meduza</button>
+        <button style="width: 100px; margin-bottom: 5px" class="btn btn-outline-dark" type="submit">meduza</button>
+    </form>
+    <form th:action='@{/feed}' th:method='get'>
+        <input type="hidden" name="sourceName" th:value="rentv">
+        <button style="width: 100px" class="btn btn-outline-dark" type="submit">rentv</button>
     </form>
 
     <h4 style="margin-top: 20px">Cloud comparator</h4>

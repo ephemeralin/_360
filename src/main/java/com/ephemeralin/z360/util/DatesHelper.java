@@ -23,15 +23,14 @@ public class DatesHelper {
 
     public static LocalDateTime parseUsingFormatRFC1123(String s) {
 //        https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html
-        ZonedDateTime parsed;
+        LocalDateTime parsed;
         DateTimeFormatter dtf = DateTimeFormatter.RFC_1123_DATE_TIME;
         try {
-            parsed = ZonedDateTime.parse(s, dtf);
+            parsed = ZonedDateTime.parse(s, dtf).toLocalDateTime();
         } catch (DateTimeParseException dtpe) {
             log.error(dtpe);
-            parsed = ZonedDateTime.now();
+            parsed = ZonedDateTime.now().toLocalDateTime();
         }
-        return parsed.toLocalDateTime();
+        return parsed;
     }
-
 }
