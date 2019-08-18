@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+>
 <head>
     <title>360˚ -> feed</title>
     <meta charset="utf-8">
@@ -16,10 +16,12 @@
             background-color: white;
             padding-top: 10px;
             padding-bottom: 10px;
+            z-index: 999;
         }
     </style>
 
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <!--    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>-->
+    <script th:src="@{/js/jquery-3.4.1.min.js}" type="text/javascript"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gijgo@1.9.10/js/gijgo.min.js" type="text/javascript"></script>
@@ -27,17 +29,10 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gijgo@1.9.10/css/gijgo.min.css" type="text/css" />
 
+    <!--  tabulator experimental  -->
+    <script th:src="@{/js/tabulator-tables/tabulator.js}" type="text/javascript"></script>
+    <link rel="stylesheet" th:href="@{/css/tabulator-tables/bootstrap/tabulator_bootstrap4.css}" type="text/css"/>
 
-    <script type="text/javascript" th:inline="javascript" class="init">
-        /*<![CDATA[*/
-        $(function () {
-            $("#startDate").datepicker({
-                uiLibrary: 'bootstrap4',
-                format: 'dd.mm.yyyy'
-            });
-        });
-        /*]]>*/
-    </script>
 
 </head>
 
@@ -52,7 +47,7 @@
         <!--title line-->
         <div class="row">
             <div class="col-2">
-                <h3 th:text="${sourceName}"></h3>
+                <h3 th:id="sourceNameTitle" th:text="${sourceName}"></h3>
             </div>
 
             <div class="col-5">
@@ -82,19 +77,22 @@
                     <div class="col-6">
                         <div class="row">
                             <div class="form-group mr-2">
+                                <!-- Date -->
                                 <input class="form-control ml-1" type="text" id="startDate" name="startDate" placeholder="date"
+                                       onchange="changedDate()"
                                        th:value="${#temporals.format(startDate, 'dd.MM.yyyy')}"/>
                             </div>
-                            <!--show-->
-                            <button style="width: 100px; margin-right: 10px" class="btn btn-outline-dark" name="show-news" type="submit">show</button>
+                            <!--update-->
                             <button style="width: 100px; margin-right: 10px" class="btn btn-outline-dark" name="update-news" type="submit">update</button>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="row justify-content-end d-flex">
+                            <!-- Keys -->
                             <input type="text" name="id" th:value="${keys?.id}" hidden/>
                             <!--save-->
-                            <input class="form-control" id="key-wrd" name="words" rows="1" placeholder="keys" th:value="${keys?.words}" style="margin-left: 10px; margin-right: 10px; width: 80%; float: right"></input>
+                            <input class="form-control" id="key-wrd" name="words" placeholder="keys" rows="1"
+                                   style="margin-left: 10px; margin-right: 10px; width: 80%; float: right"/>
                             <button style="width: 100px; float: right" class="btn btn-outline-dark" name="save-keys" type="submit">save</button>
                         </div>
                     </div>
@@ -106,24 +104,103 @@
 </div>
 
 <div class="container-fluid" style="margin-top: 0px">
-    <table class="table table-bordered table-sm">
-        <thead class="thead-dark">
-            <tr>
-                <th>date</th>
-                <th>title</th>
-                <th>description</th>
-            </tr>
-        </thead>
-        <tbody id="tbody">
-            <tr th:each="item : ${itemList}" class="small">
-                <!--<td th:text="${item.pubDate}">-</td>-->
-                <td th:text="${#temporals.format(item.pubDate, 'dd.MM.yyyy')}"></td>
-                <td th:text="${item.title}">-</td>
-                <td th:text="${item.description}">-</td>
-            </tr>
-        </tbody>
-    </table>
+
+    <!--  tabulator experimental  -->
+    <div id="feed-table"></div>
+
 </div>
 
 </body>
+<script class="init" th:inline="javascript" type="text/javascript">
+    /*<![CDATA[*/
+
+    var contextRoot = /*[[@{/}]]*/ '';
+
+    var currentDate = "";
+
+    $(function () {
+        $("#startDate").datepicker({
+            uiLibrary: 'bootstrap4',
+            format: 'dd.mm.yyyy',
+            change: function (e) {
+
+                console.log('Change is fired');
+            }
+        })
+    });
+
+    var table = new Tabulator("#feed-table", {
+        data: "",
+        layout: "fitColumns",
+        pagination: "local",
+        paginationSize: 10,
+        paginationSizeSelector: [5, 10, 15, 20],
+        columns: [
+            {title: "Id", field: "id", visible: false},
+            {title: "Date", field: "pubDate", width: 190},
+            {title: "Title", field: "title"},
+            {title: "Description", field: "description"}
+        ],
+        rowClick: function (e, row) {
+            alert(row.getData().description);
+        }
+    });
+
+    function changedDate() {
+        if (currentDate !== document.getElementById("startDate").value) {
+            loadNews();
+        }
+    }
+
+    function loadNews() {
+        var csrfParameter = $("meta[name='_csrf_parameter']").attr("content");
+        var csrfToken = $("meta[name='_csrf']").attr("content");
+        var csrfHeader = $("meta[name='_csrf_header']").attr("content");
+
+        var data = {};
+        var headers = {};
+        data[csrfParameter] = csrfToken;
+        headers[csrfHeader] = csrfToken;
+        data["sourceName"] = document.getElementById("sourceNameTitle").textContent.toString();
+
+        currentDate = document.getElementById("startDate").value;
+        data["startDate"] = currentDate;
+
+        // var login = document.getElementById("loginValue").value;
+        // var isAdmin = document.getElementById("isAdminValue").value;
+
+        $.ajax({
+            type: "POST",
+            url: "feed-load-news",
+            headers: headers,
+            data: data,
+            cache: false,
+            dataType: "json",
+
+            success: function (response) {
+                itemList = response['itemList'];
+                keys = response['keys'];
+
+                console.log("response items: " + itemList);
+                console.log("response keys: " + keys);
+
+                table.setData(itemList);
+                document.getElementById("key-wrd").value = "";
+                if (keys != null) {
+                    document.getElementById("key-wrd").value = keys.words;
+                }
+            },
+
+            error: function (error) {
+                console.log("error: " + error);
+            }
+        });
+
+    }
+
+    window.onload = loadNews();
+    /*]]>*/
+</script>
+
+
 </html>

@@ -1,6 +1,6 @@
 package com.ephemeralin.z360;
 
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -12,7 +12,7 @@ import org.springframework.core.env.Environment;
  */
 @SpringBootApplication
 @Configuration
-@Log4j2
+@Slf4j
 public class Application {
 
     private final Environment env;
@@ -34,5 +34,6 @@ public class Application {
      */
     public static void main(String[] args) {
         SpringApplication.run(Application.class);
+        log.info("testing logging with lombok");
     }
 }

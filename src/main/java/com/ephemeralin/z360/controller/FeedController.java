@@ -2,14 +2,17 @@ package com.ephemeralin.z360.controller;
 
 import com.ephemeralin.z360.grabber.GrabberFactory;
 import com.ephemeralin.z360.grabber.IGrabber;
-import com.ephemeralin.z360.grabber.MeduzaGrabber;
-import com.ephemeralin.z360.grabber.VestiGrabber;
 import com.ephemeralin.z360.model.Item;
 import com.ephemeralin.z360.model.KeywordSet;
 import com.ephemeralin.z360.model.Source;
 import com.ephemeralin.z360.service.ItemService;
 import com.ephemeralin.z360.service.KeywordService;
-import lombok.extern.log4j.Log4j2;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -26,13 +29,13 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.List;
 
 /**
  * The Feed controller.
  */
 @Controller
-@Log4j2
+@Slf4j
 public class FeedController {
 
     @Autowired
@@ -77,33 +80,65 @@ public class FeedController {
     }
 
     @GetMapping(value = "/feed")
-    public void showFeed(
+    public String showFeed(
             @DateTimeFormat(pattern="dd.MM.yyyy") @RequestParam(name="startDate", required=false, defaultValue="startOfDay") LocalDate startDate,
             @RequestParam(name = "sourceName", required = true) String sourceName,
             Model model) {
 
-        showFeedByPeriod(sourceName, startDate, model);
+        model.addAttribute("sourceName", sourceName);
+        model.addAttribute("startDate", startDate);
+        return "feed";
     }
 
     @PostMapping(value = "/feed", params = "show-news")
-    public String showFeedByPeriod(
+    public String showFeedByPeriodInitial(
             @RequestParam(name = "sourceName", required = true) String sourceName,
             @DateTimeFormat(pattern="dd.MM.yyyy") @RequestParam(name="startDate") LocalDate startDate,
             Model model) {
+
+        model.addAttribute("sourceName", sourceName);
+        model.addAttribute("startDate", startDate);
+        return "feed";
+    }
+
+    @PostMapping(value = "/feed-load-news")
+    @ResponseBody
+    public String showFeedByPeriodExp(
+            @RequestParam(name = "sourceName", required = true) String sourceName,
+            @DateTimeFormat(pattern = "dd.MM.yyyy") @RequestParam(name = "startDate") LocalDate startDate) {
+
+        log.info("-- " + sourceName);
+        log.info("-- " + startDate);
 
         Source source = Source.valueOf(sourceName);
         List<Item> itemList = itemService.findItemsByPubDateBetween(startDate.atStartOfDay(), startDate.atTime(LocalTime.MAX), source);
         KeywordSet keys = keywordService.findByDate(startDate, source);
 
-        model.addAttribute("keys", keys);
-        model.addAttribute("sourceName", sourceName);
-        model.addAttribute("itemList", itemList);
-        model.addAttribute("startDate", startDate);
-        return "feed";
+        String testData = "{\"itemList\":[]}";
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+
+        ArrayNode arrayItems = objectMapper.valueToTree(itemList);
+
+        ObjectNode nodeKeys = objectMapper.valueToTree(keys);
+
+        ObjectNode parentNode = objectMapper.createObjectNode();
+        parentNode.set("itemList", arrayItems);
+        parentNode.set("keys", nodeKeys);
+
+        try {
+            testData = objectMapper.writeValueAsString(parentNode);
+        } catch (JsonProcessingException e) {
+            log.error("Error while generating json response", e);
+        }
+
+        log.info("--- " + testData);
+        return testData;
     }
 
     @PostMapping(value = "/feed", params = "update-news")
-    public void updateFeed(
+    public void updateFeedOld(
             @RequestParam(name = "sourceName", required = true) String sourceName,
             @DateTimeFormat(pattern="dd.MM.yyyy") @RequestParam(name="startDate") LocalDate startDate,
             Model model) {
@@ -116,12 +151,12 @@ public class FeedController {
                 item.setId(id);
             }
         }
-        showFeedByPeriod(sourceName, startDate, model);
+        showFeedByPeriodInitial(sourceName, startDate, model);
     }
 
     @PostMapping(value = "/feed", params = "save-keys")
     public void saveKeys(
-            @RequestParam(name = "sourceName", required = true) String sourceName,
+            @RequestParam(name = "sourceName") String sourceName,
             @RequestParam(name = "id", required = false) Long id,
             @RequestParam(name = "words", required = false) String words,
             @DateTimeFormat(pattern="dd.MM.yyyy") @RequestParam(name="startDate") LocalDate startDate,
@@ -146,6 +181,6 @@ public class FeedController {
             long idNew = keywordService.create(keywordSet);
             keywordSet.setId(idNew);
         }
-        showFeedByPeriod(sourceName, startDate, model);
+        showFeedByPeriodInitial(sourceName, startDate, model);
     }
 }
