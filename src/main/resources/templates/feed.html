@@ -38,8 +38,8 @@
 
 <body>
 
-<input type="text" th:id="loginValue" th:value="${loginValue}" hidden/>
-<input type="text" th:id="isAdminValue" th:value="${isAdminValue}" hidden/>
+<!--<input type="text" th:id="loginValue" th:value="${loginValue}" hidden/>-->
+<!--<input type="text" th:id="isAdminValue" th:value="${isAdminValue}" hidden/>-->
 <!--<input type="text" th:id="sourceName" th:value="${sourceName}" />-->
 
 <div class="sticky">
@@ -83,17 +83,21 @@
                                        th:value="${#temporals.format(startDate, 'dd.MM.yyyy')}"/>
                             </div>
                             <!--update-->
-                            <button style="width: 100px; margin-right: 10px" class="btn btn-outline-dark" name="update-news" type="submit">update</button>
+                            <button class="btn btn-outline-dark" name="update-news" onclick="updateNews()"
+                                    style="width: 100px; margin-right: 10px" type="button">update
+                            </button>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="row justify-content-end d-flex">
                             <!-- Keys -->
-                            <input type="text" name="id" th:value="${keys?.id}" hidden/>
+                            <input hidden id="keys_id" name="id" type="text"/>
                             <!--save-->
-                            <input class="form-control" id="key-wrd" name="words" placeholder="keys" rows="1"
+                            <input class="form-control" id="key_wrd" name="words" placeholder="keys" rows="1"
                                    style="margin-left: 10px; margin-right: 10px; width: 80%; float: right"/>
-                            <button style="width: 100px; float: right" class="btn btn-outline-dark" name="save-keys" type="submit">save</button>
+                            <button class="btn btn-outline-dark" name="save-keys" onclick="saveKeys()"
+                                    style="width: 100px; float: right" type="button">save
+                            </button>
                         </div>
                     </div>
                 </form>
@@ -104,10 +108,18 @@
 </div>
 
 <div class="container-fluid" style="margin-top: 0px">
-
-    <!--  tabulator experimental  -->
+    <div class="row" style="display:none" th:id="loading_table">
+        <div class="col-12">
+            <h3 style="text-align: center;" th:id="loading_table_text" th:text="loading..."></h3>
+        </div>
+    </div>
+    <!--  loading status  -->
+    <!--    <div id="loading_table" style="display:none">-->
+    <!--        <h2><b><div style="text-align: center;">loading...</div></b></h2>-->
+    <!--&lt;!&ndash;        <img src="../static/img/ajax-table-loader.gif" th:src="@{img/ajax-table-loader.gif}" height="19" width="220"/>&ndash;&gt;-->
+    <!--    </div>-->
+    <!--  tabulator table  -->
     <div id="feed-table"></div>
-
 </div>
 
 </body>
@@ -123,7 +135,6 @@
             uiLibrary: 'bootstrap4',
             format: 'dd.mm.yyyy',
             change: function (e) {
-
                 console.log('Change is fired');
             }
         })
@@ -150,6 +161,47 @@
         if (currentDate !== document.getElementById("startDate").value) {
             loadNews();
         }
+    }
+
+    function updateNews() {
+        var csrfParameter = $("meta[name='_csrf_parameter']").attr("content");
+        var csrfToken = $("meta[name='_csrf']").attr("content");
+        var csrfHeader = $("meta[name='_csrf_header']").attr("content");
+
+        var data = {};
+        var headers = {};
+        data[csrfParameter] = csrfToken;
+        headers[csrfHeader] = csrfToken;
+        data["sourceName"] = document.getElementById("sourceNameTitle").textContent.toString();
+
+        currentDate = document.getElementById("startDate").value;
+        data["startDate"] = currentDate;
+
+        $("#loading_table").show();
+        $("#feed-table").hide();
+
+        $.ajax({
+            type: "POST",
+            url: "feed-update-news",
+            headers: headers,
+            data: data,
+            cache: false,
+            dataType: "json",
+
+            success: function (response) {
+                itemList = response['itemList'];
+                console.log("response items: " + itemList);
+                table.setData(itemList);
+                $("#loading_table").hide();
+                $("#feed-table").show();
+                table.redraw(true);
+            },
+
+            error: function (error) {
+                console.log("error while updating feed: " + error);
+            }
+        });
+
     }
 
     function loadNews() {
@@ -181,26 +233,61 @@
                 itemList = response['itemList'];
                 keys = response['keys'];
 
-                console.log("response items: " + itemList);
-                console.log("response keys: " + keys);
-
                 table.setData(itemList);
-                document.getElementById("key-wrd").value = "";
+                document.getElementById("key_wrd").value = "";
                 if (keys != null) {
-                    document.getElementById("key-wrd").value = keys.words;
+                    document.getElementById("key_wrd").value = keys.words;
+                    document.getElementById("keys_id").value = keys.id;
                 }
             },
 
             error: function (error) {
-                console.log("error: " + error);
+                console.log("error while loading feed: " + error);
             }
         });
+    }
 
+    function saveKeys() {
+        var csrfParameter = $("meta[name='_csrf_parameter']").attr("content");
+        var csrfToken = $("meta[name='_csrf']").attr("content");
+        var csrfHeader = $("meta[name='_csrf_header']").attr("content");
+
+        var data = {};
+        var headers = {};
+        data[csrfParameter] = csrfToken;
+        headers[csrfHeader] = csrfToken;
+
+        data["sourceName"] = document.getElementById("sourceNameTitle").textContent.toString();
+        data["startDate"] = document.getElementById("startDate").value;
+        data["id"] = document.getElementById("keys_id").value;
+        data["words"] = document.getElementById("key_wrd").value;
+
+        $.ajax({
+            type: "POST",
+            url: "feed-save-keys",
+            headers: headers,
+            data: data,
+            cache: false,
+            dataType: "json",
+
+            success: function (response) {
+                keys = response['keys'];
+
+                document.getElementById("key_wrd").value = "";
+                if (keys != null) {
+                    document.getElementById("key_wrd").value = keys.words;
+                    document.getElementById("keys_id").value = keys.id;
+                }
+            },
+
+            error: function (error) {
+                console.log("error while saving keys: " + error);
+            }
+        });
     }
 
     window.onload = loadNews();
     /*]]>*/
 </script>
-
 
 </html>

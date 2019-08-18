@@ -110,11 +110,77 @@ public class FeedController {
         log.info("-- " + sourceName);
         log.info("-- " + startDate);
 
+        return getFeedAsJson(Source.valueOf(sourceName), startDate);
+    }
+
+    @PostMapping(value = "/feed-update-news")
+    @ResponseBody
+    public String updateFeed(
+            @RequestParam(name = "sourceName") String sourceName,
+            @DateTimeFormat(pattern="dd.MM.yyyy") @RequestParam(name="startDate") LocalDate startDate,
+            Model model) {
         Source source = Source.valueOf(sourceName);
+        IGrabber grabber = new GrabberFactory().getGrabber(Source.valueOf(sourceName));
+        List<Item> items = grabber.getData();
+        for (Item item : items) {
+            if (itemService.findByTitle(item.getTitle(), source) == null) {
+                long id = itemService.create(item);
+                item.setId(id);
+            }
+        }
+        return getFeedAsJson(Source.valueOf(sourceName), startDate);
+    }
+
+    @PostMapping(value = "/feed-save-keys")
+    @ResponseBody
+    public String saveKeys(
+            @RequestParam(name = "sourceName") String sourceName,
+            @RequestParam(name = "id", required = false) Long id,
+            @RequestParam(name = "words", required = false) String words,
+            @DateTimeFormat(pattern = "dd.MM.yyyy") @RequestParam(name = "startDate") LocalDate startDate) {
+
+        Source source = Source.valueOf(sourceName);
+        KeywordSet keywordSet = null;
+        if (id != null) {
+            if (words.isEmpty()) {
+                keywordService.delete(id);
+            } else {
+                keywordSet = new KeywordSet(id);
+                keywordSet.setSource(source);
+                keywordSet.setCreatedDate(startDate.atStartOfDay());
+                keywordSet.setWords(words);
+                keywordService.update(keywordSet);
+            }
+        } else if (!words.isEmpty()) {
+            keywordSet = new KeywordSet();
+            keywordSet.setSource(source);
+            keywordSet.setCreatedDate(startDate.atStartOfDay());
+            keywordSet.setWords(words);
+            long idNew = keywordService.create(keywordSet);
+            keywordSet.setId(idNew);
+        }
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        ObjectNode nodeKeys = objectMapper.valueToTree(keywordSet);
+        ObjectNode parentNode = objectMapper.createObjectNode();
+        parentNode.set("keys", nodeKeys);
+
+        String result = "";
+        try {
+            result = objectMapper.writeValueAsString(parentNode);
+        } catch (JsonProcessingException e) {
+            log.error("Error while generating json response", e);
+        }
+        log.info("--- " + result);
+        return result;
+    }
+
+    private String getFeedAsJson(Source source, LocalDate startDate) {
         List<Item> itemList = itemService.findItemsByPubDateBetween(startDate.atStartOfDay(), startDate.atTime(LocalTime.MAX), source);
         KeywordSet keys = keywordService.findByDate(startDate, source);
 
-        String testData = "{\"itemList\":[]}";
+        String feedData = "{\"itemList\":[]}";
 
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
@@ -128,59 +194,11 @@ public class FeedController {
         parentNode.set("keys", nodeKeys);
 
         try {
-            testData = objectMapper.writeValueAsString(parentNode);
+            feedData = objectMapper.writeValueAsString(parentNode);
         } catch (JsonProcessingException e) {
             log.error("Error while generating json response", e);
         }
-
-        log.info("--- " + testData);
-        return testData;
-    }
-
-    @PostMapping(value = "/feed", params = "update-news")
-    public void updateFeedOld(
-            @RequestParam(name = "sourceName", required = true) String sourceName,
-            @DateTimeFormat(pattern="dd.MM.yyyy") @RequestParam(name="startDate") LocalDate startDate,
-            Model model) {
-        Source source = Source.valueOf(sourceName);
-        IGrabber grabber = new GrabberFactory().getGrabber(Source.valueOf(sourceName));
-        List<Item> items = grabber.getData();
-        for (Item item : items) {
-            if (itemService.findByTitle(item.getTitle(), source) == null) {
-                long id = itemService.create(item);
-                item.setId(id);
-            }
-        }
-        showFeedByPeriodInitial(sourceName, startDate, model);
-    }
-
-    @PostMapping(value = "/feed", params = "save-keys")
-    public void saveKeys(
-            @RequestParam(name = "sourceName") String sourceName,
-            @RequestParam(name = "id", required = false) Long id,
-            @RequestParam(name = "words", required = false) String words,
-            @DateTimeFormat(pattern="dd.MM.yyyy") @RequestParam(name="startDate") LocalDate startDate,
-            Model model) {
-
-        Source source = Source.valueOf(sourceName);
-        if (id != null) {
-            if (words.isEmpty()) {
-                keywordService.delete(id);
-            } else {
-                KeywordSet keywordSet = new KeywordSet(id);
-                keywordSet.setSource(source);
-                keywordSet.setCreatedDate(startDate.atStartOfDay());
-                keywordSet.setWords(words);
-                keywordService.update(keywordSet);
-            }
-        } else if (!words.isEmpty()) {
-            KeywordSet keywordSet = new KeywordSet();
-            keywordSet.setSource(source);
-            keywordSet.setCreatedDate(startDate.atStartOfDay());
-            keywordSet.setWords(words);
-            long idNew = keywordService.create(keywordSet);
-            keywordSet.setId(idNew);
-        }
-        showFeedByPeriodInitial(sourceName, startDate, model);
+        log.info("--- " + feedData);
+        return feedData;
     }
 }
